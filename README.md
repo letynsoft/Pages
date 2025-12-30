@@ -25,6 +25,12 @@
 
 ## Getting Started
 
+### Installation
+
+Pages is available using the [Swift Package Manager](https://swift.org/package-manager/):
+
+Using Xcode 11, go to `File -> Swift Packages -> Add Package Dependency` and enter https://github.com/nachonavarro/Pages
+
 ### Basic usage
 
 Using Pages is as easy as:
@@ -220,12 +226,6 @@ Pages(
 ## Demos
 
 All of the demos shown on the GIF can be checked out on the [demo repo](https://github.com/nachonavarro/PagesDemo).
-
-## Installation
-
-Pages is available using the [Swift Package Manager](https://swift.org/package-manager/):
-
-Using Xcode 11, go to `File -> Swift Packages -> Add Package Dependency` and enter https://github.com/nachonavarro/Pages
 
 ## Running the tests
 
