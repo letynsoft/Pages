@@ -37,6 +37,7 @@ struct PageViewController: UIViewControllerRepresentable {
     var bounce: Bool
     var wrap: Bool
     var controllers: [UIViewController]
+    fileprivate var isChanging: Bool = false
 
     func makeCoordinator() -> PagesCoordinator {
         PagesCoordinator(self)
@@ -70,10 +71,19 @@ struct PageViewController: UIViewControllerRepresentable {
            pageViewController.viewControllers?.count ?? 0 > 0 {
             return
         }
+        if isChanging {
+            return
+        }
+        self.isChanging = true
         pageViewController.setViewControllers(
             [controllers[currentPage]],
             direction: currentPage - previousPage > 0 ? .forward : .reverse,
-            animated: false
+            animated: false,
+            closure: { (complete) in
+                if complete {
+                    self.isChanging = false
+                }
+            }
         )
     }
 
