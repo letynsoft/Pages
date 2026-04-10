@@ -70,17 +70,17 @@ struct PageViewController: UIViewControllerRepresentable {
            pageViewController.viewControllers?.count ?? 0 > 0 {
             return
         }
-        if context.coordinator {
+        if context.coordinator.lastChange?.timeIntervalSinceNow ?? -2 > -2 {
             return
         }
-        context.coordinator.isChanging = true
+        context.coordinator.lastChange = .init()
         pageViewController.setViewControllers(
             [controllers[currentPage]],
             direction: currentPage - previousPage > 0 ? .forward : .reverse,
             animated: false,
-            closure: { (complete) in
+            completion: { (complete) in
                 if complete {
-                    context.coordinator.isChanging = false
+                    context.coordinator.lastChange = nil
                 }
             }
         )
@@ -92,7 +92,7 @@ struct PageViewController: UIViewControllerRepresentable {
 class PagesCoordinator: NSObject, UIPageViewControllerDataSource,
                              UIPageViewControllerDelegate {
     var parent: PageViewController
-    fileprivate var isChanging: Bool = false
+    var lastChange: Date?
 
     init(_ pageViewController: PageViewController) {
         self.parent = pageViewController
