@@ -65,23 +65,22 @@ struct PageViewController: UIViewControllerRepresentable {
         let previousPage = context.coordinator.parent.currentPage
         context.coordinator.parent = self
 
+        // CRITICAL FIX: Block updates if an animation/transition is currently running
+        guard !context.coordinator.isAnimating else { return }
+      
         if currentPage == previousPage,
            pageViewController.viewControllers != nil,
            pageViewController.viewControllers?.count ?? 0 > 0 {
             return
         }
-        if context.coordinator.lastChange?.timeIntervalSinceNow ?? -2 > -2 {
-            return
-        }
-        context.coordinator.lastChange = .init()
+
+        context.coordinator.isAnimating = true
         pageViewController.setViewControllers(
             [controllers[currentPage]],
             direction: currentPage - previousPage > 0 ? .forward : .reverse,
             animated: false,
-            completion: { (complete) in
-                if complete {
-                    context.coordinator.lastChange = nil
-                }
+            completion: { _ in
+              context.coordinator.isAnimating = false
             }
         )
     }
@@ -92,7 +91,7 @@ struct PageViewController: UIViewControllerRepresentable {
 class PagesCoordinator: NSObject, UIPageViewControllerDataSource,
                              UIPageViewControllerDelegate {
     var parent: PageViewController
-    var lastChange: Date?
+    var isAnimating = false // Track active transition state
 
     init(_ pageViewController: PageViewController) {
         self.parent = pageViewController
@@ -117,6 +116,13 @@ class PagesCoordinator: NSObject, UIPageViewControllerDataSource,
         }
         return index == parent.controllers.count - 1 ? (self.parent.wrap ? parent.controllers.first : nil) : parent.controllers[index + 1]
     }
+  
+    // MARK: - UIPageViewControllerDelegate
+    
+    func pageViewController(_ pageViewController: UIPageViewController, willTransitionTo pendingViewControllers: [UIViewController]) {
+        // Mark as animating the moment a swipe/transition starts
+        isAnimating = true
+    }
 
     func pageViewController(
         _ pageViewController: UIPageViewController,
@@ -129,6 +135,8 @@ class PagesCoordinator: NSObject, UIPageViewControllerDataSource,
         let index = parent.controllers.firstIndex(of: visibleViewController) {
             parent.currentPage = index
         }
+        // Unlock once the animation concludes
+        isAnimating = false
     }
 }
 
